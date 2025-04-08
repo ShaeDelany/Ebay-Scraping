@@ -3,13 +3,14 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import re
-
+import csv
 
 # bronzer, squishmallow, electric guitar
 
 # get command line arguments
 parser = argparse.ArgumentParser(description='Download Information from Ebay and Convert to JSON')
 parser.add_argument('search_term')
+parser.add_argument('--csv', action='store_true', help='Save results as CSV instead of JSON')
 args = parser.parse_args()
 print('args.search_term=', args.search_term)
 
@@ -94,6 +95,21 @@ for page_number in range(1, 11):
         print('item=', item)
 
 
-filename = args.search_term+'.json'
-with open(filename, 'w', encoding='ascii') as f:
-    f.write(json.dumps(items ))
+if args.csv:
+    filename = args.search_term+ '.csv'
+    with open(filename, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=[
+            'name',
+            'freereturns',
+            'items_sold',
+            'item_status',
+            'shipping_price',
+            'item_price'
+        ])
+        writer.writeheader()
+        for item in items:
+            writer.writerow(item)
+else:
+    filename = args.search_term+'.json'
+    with open(filename, 'w', encoding='ascii') as f:
+        f.write(json.dumps(items ))
